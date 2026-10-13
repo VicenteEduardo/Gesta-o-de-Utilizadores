@@ -3,20 +3,38 @@
 API REST em Python (FastAPI) para registo de utilizadores, autenticação com JWT
 e gestão de permissões por perfil (`admin` / `user`).
 
-## Objectivo do Projecto
+## Objectivo
 
-Construir uma API REST para **registar utilizadores, autenticar contas com JWT e gerir
-permissões**, servindo como projecto de aprendizagem de boas práticas em Python:
+Disponibilizar uma API REST de gestão de utilizadores — registo, autenticação
+e controlo de acessos — construída como referência de boas práticas em Python:
 
-- **Funcional:** CRUD completo de utilizadores, login com JWT, dois perfis
-  (`admin` gere todos; `user` gere só a si), validação de dados e erros HTTP
-  consistentes (`401/403/404/409/422`), com SQLite por defeito e PostgreSQL via `DATABASE_URL`.
-- **Técnico:** aplicar **DDD em 4 camadas** (`domain` → `application` →
-  `infrastructure` → `presentation`), desenvolver com **TDD** (Red → Green →
-  Refactor, `tests/unit` + `tests/integration`) e respeitar os 5 princípios
-  **SOLID** (ver tabela abaixo), com entrega contentorizada em **Docker**.
-- **Critério de sucesso:** `pytest` com todos os testes verdes, API a correr via
-  `uvicorn` e via `docker compose up`, documentada em `/docs`.
+**Âmbito funcional**
+
+- CRUD completo de utilizadores, com validação de dados à entrada e respostas
+  de erro consistentes (`401` credenciais/token, `403` sem permissão,
+  `404` recurso inexistente, `409` email duplicado, `422` validação).
+- Autenticação por JWT com expiração configurável.
+- Modelo de permissões com dois perfis: `admin` gere qualquer conta,
+  `user` gere apenas a própria.
+- Persistência em SQLite por defeito, com suporte a PostgreSQL através da
+  variável `DATABASE_URL`, sem alterações de código.
+
+**Abordagem técnica**
+
+- Arquitetura em quatro camadas (`domain` → `application` → `infrastructure`
+  → `presentation`): as regras de negócio não dependem de frameworks nem da
+  base de dados, o que as torna simples de testar e de evoluir.
+- Desenvolvimento orientado por testes (TDD, ciclo Red → Green → Refactor),
+  com testes unitários (`tests/unit`) e de integração sobre HTTP (`tests/integration`).
+- Princípios SOLID aplicados na separação de responsabilidades, nas interfaces
+  de persistência e na injecção de dependências (ver tabela abaixo).
+- Entrega contentorizada com Docker (SQLite por defeito, PostgreSQL opcional
+  via `docker compose --profile postgres up`).
+
+**Definição de pronto**
+
+`pytest` com todos os testes verdes, API executável via `uvicorn` e via
+`docker compose`, com documentação interativa disponível em `/docs`.
 
 ## Arquitetura (DDD em 4 camadas)
 
@@ -52,7 +70,7 @@ tests/
 ```bash
 python -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt
-pytest -v            # ~13 testes
+pytest -v
 ```
 
 ## Correr
@@ -69,8 +87,11 @@ uvicorn app.main:app --reload
 docker compose up --build
 ```
 
-PostgreSQL: descomentar o bloco `db` no `docker-compose.yml` e usar
-`DATABASE_URL=postgresql://app:app@db:5432/users`.
+PostgreSQL (opcional, via profile `postgres`):
+
+```bash
+DATABASE_URL=postgresql://app:app@db:5432/users docker compose --profile postgres up --build
+```
 
 ## Endpoints
 

@@ -1,8 +1,8 @@
-"""Exceções de domínio (tratamento de erros uniforme)."""
+"""Erros de negócio. A camada HTTP traduz cada um no status adequado."""
 
 
 class DomainError(Exception):
-    pass
+    """Base para todos os erros de negócio."""
 
 
 class UserNotFound(DomainError):

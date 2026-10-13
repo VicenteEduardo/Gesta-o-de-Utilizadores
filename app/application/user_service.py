@@ -43,7 +43,7 @@ class UserService:
         return user
 
     def list(self, current: User, skip: int = 0, limit: int = 100) -> List[User]:
-        if current.role != "admin":
+        if not current.is_admin:
             raise Forbidden("Apenas administradores listam utilizadores.")
         return self.repo.list_all(skip, limit)
 
@@ -71,7 +71,7 @@ class UserService:
         return self.repo.update(user)
 
     def change_role(self, user_id: int, current: User, role: str) -> User:
-        if current.role != "admin":
+        if not current.is_admin:
             raise Forbidden("Apenas administradores gerem permissões.")
         if role not in ("admin", "user"):
             raise ValueError("Perfil deve ser 'admin' ou 'user'.")

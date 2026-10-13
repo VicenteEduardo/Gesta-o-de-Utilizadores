@@ -1,4 +1,8 @@
-"""Rota de autenticação: aceita JSON e form OAuth2 (para o Swagger)."""
+"""Autenticação: recebe credenciais e devolve o token de acesso.
+
+Aceita JSON (`/login`, o mais cómodo para clientes) e formulário OAuth2
+(`/token`, o que o botão "Authorize" do Swagger usa).
+"""
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm
 
@@ -11,20 +15,23 @@ from app.presentation.schemas import LoginIn, TokenOut
 router = APIRouter(prefix="/auth", tags=["auth"])
 
 
-@router.post("/login", response_model=TokenOut)
-def login_json(payload: LoginIn, repo: SQLUserRepository = Depends(get_repo)):
+def issue_token(repo: SQLUserRepository, email: str, password: str) -> TokenOut:
     try:
-        token = AuthService(repo).login(payload.email, payload.password)
-        return TokenOut(access_token=token)
-    except InvalidCredentials as e:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail=str(e))
+        return TokenOut(access_token=AuthService(repo).login(email, password))
+    except InvalidCredentials as exc:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED, detail=str(exc)
+        ) from exc
+
+
+@router.post("/login", response_model=TokenOut)
+def login(payload: LoginIn, repo: SQLUserRepository = Depends(get_repo)):
+    return issue_token(repo, payload.email, payload.password)
 
 
 @router.post("/token", response_model=TokenOut, include_in_schema=False)
-def login_form(form: OAuth2PasswordRequestForm = Depends(),
-               repo: SQLUserRepository = Depends(get_repo)):
-    try:
-        token = AuthService(repo).login(form.username, form.password)
-        return TokenOut(access_token=token)
-    except InvalidCredentials as e:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail=str(e))
+def login_for_swagger(
+    form: OAuth2PasswordRequestForm = Depends(),
+    repo: SQLUserRepository = Depends(get_repo),
+):
+    return issue_token(repo, form.username, form.password)

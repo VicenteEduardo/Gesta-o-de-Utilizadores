@@ -1,7 +1,9 @@
-"""Schemas Pydantic = validação na borda (Presentation)."""
-from typing import List, Optional
+"""Contratos de entrada/saída HTTP: é aqui que os dados são validados."""
+from typing import Literal, Optional
 
 from pydantic import BaseModel, ConfigDict, EmailStr, Field
+
+Role = Literal["admin", "user"]
 
 
 class UserCreate(BaseModel):
@@ -16,22 +18,17 @@ class UserUpdate(BaseModel):
 
 
 class RoleUpdate(BaseModel):
-    role: str = Field(pattern="^(admin|user)$")
+    role: Role
 
 
 class UserOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     id: int
     name: str
     email: EmailStr
     role: str
     is_active: bool
-
-    model_config = ConfigDict(from_attributes=True)
-
-
-class UserListOut(BaseModel):
-    users: List[UserOut]
-    total: int
 
 
 class LoginIn(BaseModel):
@@ -42,7 +39,3 @@ class LoginIn(BaseModel):
 class TokenOut(BaseModel):
     access_token: str
     token_type: str = "bearer"
-
-
-class ErrorOut(BaseModel):
-    detail: str

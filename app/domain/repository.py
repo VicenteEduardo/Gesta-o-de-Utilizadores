@@ -1,4 +1,8 @@
-"""Interfaces do domínio (Dependency Inversion: aplicação depende disto, não do SQL)."""
+"""Contrato de persistência de utilizadores.
+
+Os casos de uso programam contra esta interface; a implementação concreta
+(SQLAlchemy, memória, etc.) é injectada de fora.
+"""
 from abc import ABC, abstractmethod
 from typing import List, Optional
 
