@@ -1,0 +1,27 @@
+services:
+  api:
+    build: .
+    ports:
+      - "8000:8000"
+    environment:
+      DATABASE_URL: sqlite:///./users.db
+      JWT_SECRET: change-me-em-producao
+    volumes:
+      - ./users.db:/code/users.db
+
+  # PostgreSQL (descomentar para usar em vez de SQLite):
+  # db:
+  #   image: postgres:16
+  #   environment:
+  #     POSTGRES_USER: app
+  #     POSTGRES_PASSWORD: app
+  #     POSTGRES_DB: users
+  #   ports:
+  #     - "5432:5432"
+  #   volumes:
+  #     - pgdata:/var/lib/postgresql/data
+  # api:
+  #   environment:
+  #     DATABASE_URL: postgresql://app:app@db:5432/users
+  #volumes:
+  #  pgdata:
