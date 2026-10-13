@@ -1,6 +1,7 @@
-# API de Gestão de Utilizadores (Python · DDD · TDD · SOLID · Docker)
+# API de Gestão de Utilizadores
 
-Nível iniciante. CRUD + JWT + permissões (`admin` / `user`).
+API REST em Python (FastAPI) para registo de utilizadores, autenticação com JWT
+e gestão de permissões por perfil (`admin` / `user`).
 
 ## Objectivo do Projecto
 

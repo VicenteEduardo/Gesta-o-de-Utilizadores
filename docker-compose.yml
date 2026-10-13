@@ -3,25 +3,39 @@ services:
     build: .
     ports:
       - "8000:8000"
+    env_file:
+      - path: .env
+        required: false
     environment:
-      DATABASE_URL: sqlite:///./users.db
-      JWT_SECRET: change-me-em-producao
+      DATABASE_URL: ${DATABASE_URL:-sqlite:///./users.db}
+      JWT_SECRET: ${JWT_SECRET:-change-me-em-producao}
+      JWT_EXPIRE_MINUTES: ${JWT_EXPIRE_MINUTES:-60}
     volumes:
       - ./users.db:/code/users.db
+    depends_on:
+      db:
+        condition: service_healthy
+        required: false
 
-  # PostgreSQL (descomentar para usar em vez de SQLite):
-  # db:
-  #   image: postgres:16
-  #   environment:
-  #     POSTGRES_USER: app
-  #     POSTGRES_PASSWORD: app
-  #     POSTGRES_DB: users
-  #   ports:
-  #     - "5432:5432"
-  #   volumes:
-  #     - pgdata:/var/lib/postgresql/data
-  # api:
-  #   environment:
-  #     DATABASE_URL: postgresql://app:app@db:5432/users
-  #volumes:
-  #  pgdata:
+  # Base de dados PostgreSQL (opcional — só arranca com --profile postgres).
+  # Exemplo:  DATABASE_URL=postgresql://app:app@db:5432/users docker compose --profile postgres up --build
+  db:
+    image: postgres:16-alpine
+    profiles:
+      - postgres
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-app}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-app}
+      POSTGRES_DB: ${POSTGRES_DB:-users}
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER:-app}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  pgdata:
